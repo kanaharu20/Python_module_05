@@ -120,18 +120,10 @@ class DataStream():
         for data in stream:
             process_flag: int = 0
             for processer in self._processers:
-                if isinstance(data, list):
-                    for content in data:
-                        if self.processer.dalidate(content) is True:
-                            self.processer.ingest(content)
-                            process_flag = 1
-                        else:
-                            process_flag = 0
-                            break
-                else:
-                    if self.processer.dalidate(content) is True:
-                        self.processer.ingest(content)
-                        process_flag = 1
+                if processer.validate(data) is True:
+                    processer.ingest(data)
+                    process_flag = 1
+                    break
             if process_flag == 0:
                 print(
                     "DataStream error - "
@@ -143,23 +135,27 @@ class DataStream():
             print("No processor found, no data\n")
         for processer in self._processers:
             print(
-                f"{processer}: total {self.processer._processed_data_num} "
-                f"items processed, remaining {self.proseccer._data_stock} "
+                f"{processer.__class__.__name__}: "
+                f"total {processer._processed_data_num} "
+                f"items processed, remaining {len(processer._data_stock)} "
                 "on processor"
                 )
 
 
 if __name__ == "__main__":
     def main() -> None:
+        numeric_proc: NumericProcessor = NumericProcessor()
+        text_proc = TextProcessor()
+        log_proc = LogProcessor()
         print("=== Code Nexus - Data Stream ===\n")
         print("Initialize Data Stream...")
         test_class = DataStream()
         print("== DataStream statistics ==")
         test_class.print_processors_stats()
         print("Registering Numeric Processor")
-        test_class.register_processor(NumericProcessor)
+        test_class.register_processor(numeric_proc)
         test_data: list[
-            str, list[float, dict, int, float],
+            str, list[float | dict | int],
             int, dict
             ] = [
                 'Hello world', [3.14, -1, 2.71],
@@ -173,8 +169,8 @@ if __name__ == "__main__":
         print("== DataStream statistics ==")
         test_class.print_processors_stats()
         print("Registering other data Processor")
-        test_class.register_processor(TextProcessor)
-        test_class.register_processor(LogProcessor)
+        test_class.register_processor(text_proc)
+        test_class.register_processor(log_proc)
         print("Send the same batch again")
         test_class.process_stream(test_data)
         print("== DataStream statistics ==")
@@ -187,6 +183,12 @@ if __name__ == "__main__":
             "\nConsume some elements from the data processors: Numeric "
             f"{to_consume_num}, Text {to_consume_txt}, Log {to_consume_log}"
             )
+        for _ in range(to_consume_num):
+            numeric_proc.output()
+        for _ in range(to_consume_txt):
+            text_proc.output()
+        for _ in range(to_consume_log):
+            log_proc.output()
         print("== DataStream statistics ==")
         test_class.print_processors_stats()
 

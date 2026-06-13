@@ -98,11 +98,15 @@ class LogProcessor(DataProcessor):
             if isinstance(data, list):
                 for content in data:
                     self._data_stock.append(
-                        (self._processed_data_num, str(f"{content['log_level']}: {content['log_message']}"))
+                        (self._processed_data_num,
+                            str(f"{content['log_level']}:"
+                                f" {content['log_message']}"))
                         )
                     self._processed_data_num += 1
             else:
-                self._data_stock.append((self._processed_data_num, str(f"{data['log_level']}: {data['log_message']}")))
+                self._data_stock.append((
+                    self._processed_data_num,
+                    str(f"{data['log_level']}: {data['log_message']}")))
                 self._processed_data_num += 1
         except TypeError as e:
             print(e)

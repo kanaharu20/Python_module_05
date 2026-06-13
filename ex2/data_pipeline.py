@@ -180,7 +180,8 @@ class DataStream():
                     data_to_output.append(processer.output())
                 except Exception:
                     break
-            plugin.process_output(data_to_output)
+            if data_to_output:
+                plugin.process_output(data_to_output)
 
 
 if __name__ == "__main__":
@@ -211,9 +212,8 @@ if __name__ == "__main__":
         ]
         print(f"Send first batch of data on stream: {test1}")
         data_stream.process_stream(test1)
-        csv: CSV = CSV()
-        print("CSV Output")
-        data_stream.output_pipeline(3, csv)
+        csv_plugin: CSV = CSV()
+        data_stream.output_pipeline(3, csv_plugin)
         print("\n== DataStream statistics ==")
         data_stream.print_processors_stats()
         test2: list[str | int | dict | list[dict | int | str]] = [
@@ -234,9 +234,8 @@ if __name__ == "__main__":
         print("\n== DataStream statistics ==")
         data_stream.print_processors_stats()
         print("Send 5 processed data from each processor to a JSON plugin:")
-        json: JSON = JSON()
-        print("JSON Output")
-        data_stream.output_pipeline(5, json)
+        json_plugin: JSON = JSON()
+        data_stream.output_pipeline(5, json_plugin)
         print("\n== DataStream statistics ==")
         data_stream.print_processors_stats()
 

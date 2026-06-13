@@ -10,24 +10,25 @@ class ExportPlugin(Protocol):
         ...
 
 
-class CSV():
+class CSV:
     def process_output(self, data: list[tuple[int, str]]) -> None:
         print("CSV Output")
         index, content = zip(*data)
         print(",".join(content))
 
 
-class JSON():
+class JSON:
     def process_output(self, data: list[tuple[int, str]]) -> None:
         print("JSON Output")
         index, content = zip(*data)
         i: int = 0
         print("{", end="")
-        while index[i]:
+        while i < len(index):
             print(f'"item_{index[i]}": "{content[i]}"', end="")
             if i != len(index) - 1:
                 print(",", end="")
-            print("}")
+            i += 1
+        print("}")
 
 
 class DataProcessor(ABC):
@@ -174,10 +175,11 @@ class DataStream():
     def output_pipeline(self, nb: int, plugin: ExportPlugin) -> None:
         for processer in self._processers:
             data_to_output: list[tuple[int, str]] = []
-            try:
-                data_to_output.append(processer.output())
-            except Exception:
-                break
+            for _ in range(nb):
+                try:
+                    data_to_output.append(processer.output())
+                except Exception:
+                    break
             plugin.process_output(data_to_output)
 
 
@@ -190,7 +192,7 @@ if __name__ == "__main__":
         log_proc: LogProcessor = LogProcessor()
         data_stream: DataStream = DataStream()
         print("\n== DataStream statistics ==")
-        DataStream.print_processors_stats()
+        data_stream.print_processors_stats()
         print("Registering Processors\n")
         data_stream.register_processor(num_proc)
         data_stream.register_processor(txt_proc)
